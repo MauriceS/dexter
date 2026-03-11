@@ -9,4 +9,5 @@ export { getInsiderTrades } from './insider_trades.js';
 export { createFinancialSearch } from './financial-search.js';
 export { createFinancialMetrics } from './financial-metrics.js';
 export { createReadFilings } from './read-filings.js';
+export { createReadOsloFilings, READ_OSLO_FILINGS_DESCRIPTION } from './read-newsweb.js';
 

@@ -1,7 +1,8 @@
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
-import { callApi, stripFieldsDeep } from './api.js';
+import { callApi, stripFieldsDeep, shouldUseYahooFinance } from './api.js';
 import { formatToolResult } from '../types.js';
+import * as yf from './yfinance-api.js';
 
 const REDUNDANT_FINANCIAL_FIELDS = ['accession_number', 'currency', 'period'] as const;
 
@@ -18,6 +19,10 @@ export const getKeyRatios = new DynamicStructuredTool({
   schema: KeyRatiosInputSchema,
   func: async (input) => {
     const ticker = input.ticker.trim().toUpperCase();
+    if (shouldUseYahooFinance(ticker)) {
+      const snapshot = await yf.getKeyRatiosSnapshot(ticker);
+      return formatToolResult(snapshot, ['Yahoo Finance']);
+    }
     const params = { ticker };
     const { data, url } = await callApi('/financial-metrics/snapshot/', params);
     return formatToolResult(data.snapshot || {}, [url]);
