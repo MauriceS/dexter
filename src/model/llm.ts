@@ -102,7 +102,8 @@ const MODEL_FACTORIES: Record<string, ModelFactory> = {
       ...opts,
       apiKey: getApiKey('MOONSHOT_API_KEY'),
       configuration: {
-        baseURL: 'https://api.moonshot.cn/v1',
+        // EU endpoint by default; set MOONSHOT_BASE_URL=https://api.moonshot.cn/v1 for China
+        baseURL: process.env.MOONSHOT_BASE_URL ?? 'https://api.moonshot.ai/v1',
       },
     }),
   deepseek: (name, opts) =>

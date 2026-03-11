@@ -28,7 +28,7 @@ const PROVIDER_MODELS: Record<string, Model[]> = {
     { id: 'grok-4-0709', displayName: 'Grok 4' },
     { id: 'grok-4-1-fast-reasoning', displayName: 'Grok 4.1 Fast Reasoning' },
   ],
-  moonshot: [{ id: 'kimi-k2-5', displayName: 'Kimi K2.5' }],
+  moonshot: [{ id: 'kimi-k2.5', displayName: 'Kimi K2.5' }],
   deepseek: [
     { id: 'deepseek-chat', displayName: 'DeepSeek V3' },
     { id: 'deepseek-reasoner', displayName: 'DeepSeek R1' },
