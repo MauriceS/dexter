@@ -91,6 +91,7 @@
 - Release script: `bash scripts/release.sh [version]` (defaults to today's date).
 - Release flow: bump version in `package.json`, create git tag, push tag, create GitHub release via `gh`.
 - Do not push or publish without user confirmation.
+- Do not mention AI involvement in commit messages, PR titles, or PR descriptions. Write them as a human author would.
 
 ## Testing
 
