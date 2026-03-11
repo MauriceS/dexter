@@ -1,7 +1,8 @@
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
-import { callApi, stripFieldsDeep } from './api.js';
+import { callApi, stripFieldsDeep, shouldUseYahooFinance } from './api.js';
 import { formatToolResult } from '../types.js';
+import * as yf from './yfinance-api.js';
 
 const REDUNDANT_FINANCIAL_FIELDS = ['accession_number', 'currency', 'period'] as const;
 
@@ -61,6 +62,16 @@ export const getIncomeStatements = new DynamicStructuredTool({
   description: `Fetches a company's income statements, detailing its revenues, expenses, net income, etc. over a reporting period. Useful for evaluating a company's profitability and operational efficiency.`,
   schema: FinancialStatementsInputSchema,
   func: async (input) => {
+    const ticker = input.ticker.trim().toUpperCase();
+    if (shouldUseYahooFinance(ticker)) {
+      const stmts = await yf.getIncomeStatements(ticker, input.period, input.limit, {
+        report_period_gte: input.report_period_gte,
+        report_period_gt: input.report_period_gt,
+        report_period_lte: input.report_period_lte,
+        report_period_lt: input.report_period_lt,
+      });
+      return formatToolResult(stmts, ['Yahoo Finance']);
+    }
     const params = createParams(input);
     const { data, url } = await callApi('/financials/income-statements/', params);
     return formatToolResult(
@@ -75,6 +86,16 @@ export const getBalanceSheets = new DynamicStructuredTool({
   description: `Retrieves a company's balance sheets, providing a snapshot of its assets, liabilities, shareholders' equity, etc. at a specific point in time. Useful for assessing a company's financial position.`,
   schema: FinancialStatementsInputSchema,
   func: async (input) => {
+    const ticker = input.ticker.trim().toUpperCase();
+    if (shouldUseYahooFinance(ticker)) {
+      const stmts = await yf.getBalanceSheets(ticker, input.period, input.limit, {
+        report_period_gte: input.report_period_gte,
+        report_period_gt: input.report_period_gt,
+        report_period_lte: input.report_period_lte,
+        report_period_lt: input.report_period_lt,
+      });
+      return formatToolResult(stmts, ['Yahoo Finance']);
+    }
     const params = createParams(input);
     const { data, url } = await callApi('/financials/balance-sheets/', params);
     return formatToolResult(
@@ -89,6 +110,16 @@ export const getCashFlowStatements = new DynamicStructuredTool({
   description: `Retrieves a company's cash flow statements, showing how cash is generated and used across operating, investing, and financing activities. Useful for understanding a company's liquidity and solvency.`,
   schema: FinancialStatementsInputSchema,
   func: async (input) => {
+    const ticker = input.ticker.trim().toUpperCase();
+    if (shouldUseYahooFinance(ticker)) {
+      const stmts = await yf.getCashFlowStatements(ticker, input.period, input.limit, {
+        report_period_gte: input.report_period_gte,
+        report_period_gt: input.report_period_gt,
+        report_period_lte: input.report_period_lte,
+        report_period_lt: input.report_period_lt,
+      });
+      return formatToolResult(stmts, ['Yahoo Finance']);
+    }
     const params = createParams(input);
     const { data, url } = await callApi('/financials/cash-flow-statements/', params);
     return formatToolResult(
@@ -103,6 +134,16 @@ export const getAllFinancialStatements = new DynamicStructuredTool({
   description: `Retrieves all three financial statements (income statements, balance sheets, and cash flow statements) for a company in a single API call. This is more efficient than calling each statement type separately when you need all three for comprehensive financial analysis.`,
   schema: FinancialStatementsInputSchema,
   func: async (input) => {
+    const ticker = input.ticker.trim().toUpperCase();
+    if (shouldUseYahooFinance(ticker)) {
+      const all = await yf.getAllStatements(ticker, input.period, input.limit, {
+        report_period_gte: input.report_period_gte,
+        report_period_gt: input.report_period_gt,
+        report_period_lte: input.report_period_lte,
+        report_period_lt: input.report_period_lt,
+      });
+      return formatToolResult(all, ['Yahoo Finance']);
+    }
     const params = createParams(input);
     const { data, url } = await callApi('/financials/', params);
     return formatToolResult(

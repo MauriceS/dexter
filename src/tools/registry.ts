@@ -1,5 +1,5 @@
 import { StructuredToolInterface } from '@langchain/core/tools';
-import { createFinancialSearch, createFinancialMetrics, createReadFilings } from './finance/index.js';
+import { createFinancialSearch, createFinancialMetrics, createReadFilings, createReadOsloFilings } from './finance/index.js';
 import { exaSearch, perplexitySearch, tavilySearch, WEB_SEARCH_DESCRIPTION, xSearchTool, X_SEARCH_DESCRIPTION } from './search/index.js';
 import { skillTool, SKILL_TOOL_DESCRIPTION } from './skill.js';
 import { webFetchTool, WEB_FETCH_DESCRIPTION } from './fetch/web-fetch.js';
@@ -10,6 +10,7 @@ import { editFileTool, EDIT_FILE_DESCRIPTION } from './filesystem/edit-file.js';
 import { FINANCIAL_SEARCH_DESCRIPTION } from './finance/financial-search.js';
 import { FINANCIAL_METRICS_DESCRIPTION } from './finance/financial-metrics.js';
 import { READ_FILINGS_DESCRIPTION } from './finance/read-filings.js';
+import { READ_OSLO_FILINGS_DESCRIPTION } from './finance/read-newsweb.js';
 import { heartbeatTool, HEARTBEAT_TOOL_DESCRIPTION } from './heartbeat/heartbeat-tool.js';
 import { memoryGetTool, MEMORY_GET_DESCRIPTION, memorySearchTool, MEMORY_SEARCH_DESCRIPTION, memoryUpdateTool, MEMORY_UPDATE_DESCRIPTION } from './memory/index.js';
 import { discoverSkills } from '../skills/index.js';
@@ -49,6 +50,11 @@ export function getToolRegistry(model: string): RegisteredTool[] {
       name: 'read_filings',
       tool: createReadFilings(model),
       description: READ_FILINGS_DESCRIPTION,
+    },
+    {
+      name: 'read_oslo_filings',
+      tool: createReadOsloFilings(model),
+      description: READ_OSLO_FILINGS_DESCRIPTION,
     },
     {
       name: 'web_fetch',

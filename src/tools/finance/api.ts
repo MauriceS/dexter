@@ -3,6 +3,27 @@ import { logger } from '../../utils/logger.js';
 
 const BASE_URL = 'https://api.financialdatasets.ai';
 
+/** Tickers available for free on financialdatasets.ai (no API key required). */
+const FREE_TICKERS = new Set(['AAPL', 'GOOGL', 'MSFT', 'NVDA', 'TSLA']);
+
+/**
+ * Returns true when Yahoo Finance should be used instead of financialdatasets.ai.
+ *
+ * Controlled by the DATA_SOURCE environment variable:
+ *   - `yfinance`           → always use Yahoo Finance (free, no key needed)
+ *   - `financialdatasets`  → always use financialdatasets.ai (requires API key for non-free tickers)
+ *   - `auto` (default)     → use Yahoo Finance when no API key is set and the ticker is
+ *                            not in the free set (AAPL/GOOGL/MSFT/NVDA/TSLA)
+ */
+export function shouldUseYahooFinance(ticker: string): boolean {
+  const source = process.env.DATA_SOURCE ?? 'auto';
+  if (source === 'yfinance') return true;
+  if (source === 'financialdatasets') return false;
+  // auto: fall back to Yahoo Finance when there is no API key and the ticker is not free
+  const apiKey = process.env.FINANCIAL_DATASETS_API_KEY;
+  return !apiKey && !FREE_TICKERS.has(ticker.toUpperCase());
+}
+
 export interface ApiResponse {
   data: Record<string, unknown>;
   url: string;

@@ -1,10 +1,11 @@
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
-import { callApi } from './api.js';
+import { callApi, shouldUseYahooFinance } from './api.js';
 import { formatToolResult } from '../types.js';
+import * as yf from './yfinance-api.js';
 
 export const STOCK_PRICE_DESCRIPTION = `
-Fetches current stock price snapshots for equities, including open, high, low, close prices, volume, and market cap. Powered by Financial Datasets.
+Fetches current stock price snapshots for equities, including open, high, low, close prices, volume, and market cap. Powered by Financial Datasets with Yahoo Finance fallback.
 `.trim();
 
 const StockPriceInputSchema = z.object({
@@ -20,6 +21,10 @@ export const getStockPrice = new DynamicStructuredTool({
   schema: StockPriceInputSchema,
   func: async (input) => {
     const ticker = input.ticker.trim().toUpperCase();
+    if (shouldUseYahooFinance(ticker)) {
+      const snapshot = await yf.getCurrentQuote(ticker);
+      return formatToolResult(snapshot, ['Yahoo Finance']);
+    }
     const params = { ticker };
     const { data, url } = await callApi('/prices/snapshot/', params);
     return formatToolResult(data.snapshot || {}, [url]);
@@ -44,8 +49,13 @@ export const getStockPrices = new DynamicStructuredTool({
     'Retrieves historical price data for a stock over a specified date range, including open, high, low, close prices and volume.',
   schema: StockPricesInputSchema,
   func: async (input) => {
+    const ticker = input.ticker.trim().toUpperCase();
+    if (shouldUseYahooFinance(ticker)) {
+      const prices = await yf.getHistoricalPrices(ticker, input.start_date, input.end_date, input.interval);
+      return formatToolResult(prices, ['Yahoo Finance']);
+    }
     const params = {
-      ticker: input.ticker.trim().toUpperCase(),
+      ticker,
       interval: input.interval,
       start_date: input.start_date,
       end_date: input.end_date,
